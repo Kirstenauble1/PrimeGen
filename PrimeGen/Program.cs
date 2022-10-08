@@ -25,19 +25,23 @@ static class PrimeGen
         BigInteger r = BigInteger.Zero;
         BigInteger valMinusOne = BigInteger.Subtract(value, BigInteger.One);
         BigInteger d = valMinusOne;
-        while (BigInteger.ModPow(d, BigInteger.One, two) == BigInteger.Zero)
+        while (BigInteger.Remainder(d, two) == BigInteger.Zero)
         {
             d = BigInteger.Divide(d, two);
-            r++;
+            r = BigInteger.Add(r, BigInteger.One);
         }
         
 
         // witness loop
         for (int i = 0; i < k; i++)
         {
-            Byte[] array = RandomNumberGenerator.GetBytes(rnd.Next(4, byteLength));
-            BigInteger a = new BigInteger(array);
-
+            // a is negative numbers 
+            BigInteger a = two;
+            while (a <= two)
+            {
+                Byte[] array = RandomNumberGenerator.GetBytes(rnd.Next(4, byteLength));
+                a = new BigInteger(array);
+            }
             BigInteger x = BigInteger.ModPow(a, d, value);
 
             if (x == BigInteger.One || x == valMinusOne)
@@ -162,6 +166,8 @@ static class PrimeGen
                 MaxDegreeOfParallelism = 5
             };
 
+            BigInteger two = new BigInteger(2);
+
             Stopwatch watch = new Stopwatch();
             watch.Start();
 
@@ -171,26 +177,27 @@ static class PrimeGen
                 {
                     Byte[] array = RandomNumberGenerator.GetBytes(bytes);
                     var bi = new BigInteger(array);
-                    BigInteger remainder;
-                    BigInteger.DivRem(bi, new BigInteger(2), out remainder);
+                    BigInteger remainder = BigInteger.Remainder(bi, two);
                     if (remainder != BigInteger.Zero && bi > BigInteger.Zero)
                     {
-                        if (bi.IsProbablyPrime())
+                        if (sumDigits(bi))
                         {
-                            lock (locker)
+                            if (bi.IsProbablyPrime())
                             {
-                                Console.Write(idx + ": ");
-                                Console.WriteLine(bi);
-                                if (idx != count)
+                                lock (locker)
                                 {
-                                    Console.Write("\n");
+                                    Console.Write(idx + ": ");
+                                    Console.WriteLine(bi);
+                                    if (idx != count)
+                                    {
+                                        Console.Write("\n");
+                                    }
                                 }
-                            }
 
-                            Interlocked.Increment(ref idx);
-                            break;
+                                Interlocked.Increment(ref idx);
+                                break;
+                            }
                         }
-                        
                     }
                 }
             });
