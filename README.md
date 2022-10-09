@@ -1,7 +1,7 @@
 # PrimeGen
 Author: Kirsten Auble
 
-Displays number of files, folders, and bytes in a directory.
+Generates given number of prime numbers with provided byte size.
 
 To run on any OS, use below commands:<br />
 dotnet run <byte-length><count><br />
